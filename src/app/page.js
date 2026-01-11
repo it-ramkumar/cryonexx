@@ -31,7 +31,6 @@ const productImages = [
   '/images/c10.png', '/images/c11.png'
 ];
 
-// Installation Videos - Updated with Google Drive video
 const installationVideos = [
   {
     id: 1,
@@ -39,17 +38,19 @@ const installationVideos = [
     description: "Step-by-step installation tutorial for Cryonex systems",
     video: "https://drive.google.com/file/d/1Ga-Uy7yq17qgqn5FS8Ht1sSWrCSPwbY-/preview",
     thumbnail: "https://drive.google.com/thumbnail?id=1Ga-Uy7yq17qgqn5FS8Ht1sSWrCSPwbY-&sz=w1000",
-    
+    mobileThumbnail: "https://drive.google.com/thumbnail?id=1Ga-Uy7yq17qgqn5FS8Ht1sSWrCSPwbY-&sz=w500",
+    isDrive: true
   },
   {
     id: 2,
     title: "Installation Guide - Part 2",
     description: "Advanced configuration and optimization",
     video: "/q2.mp4",
-    
+    thumbnail: "/q2-thumb.jpg", // Create a compressed thumbnail
+    mobileVideo: "/q2-compressed.mp4", // Create a compressed version for mobile
+    isDrive: false
   }
 ];
-
 // External URLs
 const EXTERNAL_URLS = {
   shopAll: "https://vankea.com/collections/hvac",
@@ -926,54 +927,60 @@ export default function CryonexPage() {
           ))}
         </div>
         
-        {/* Interactive Particles */}
-        {particles.map((particle) => (
-          <motion.div
-            key={particle.id}
-            className="absolute"
-            initial={{
-              x: `${particle.x}vw`,
-              y: `${particle.y}vh`,
-              opacity: particle.opacity
-            }}
-            animate={{
-              x: `${particle.x + Math.sin(particle.id * 0.1) * 10}vw`,
-              y: `${particle.y + Math.cos(particle.id * 0.1) * 10}vh`,
-              opacity: [particle.opacity, particle.opacity * 0.5, particle.opacity]
-            }}
-            transition={{
-              duration: particle.speed * 4,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            style={{
-              width: `${particle.size}px`,
-              height: `${particle.size}px`,
-              background: `radial-gradient(circle, rgba(16, 185, 129, ${particle.opacity}) 0%, transparent 70%)`,
-              filter: 'blur(0.5px)',
-              willChange: 'transform'
-            }}
-          />
-        ))}
-        
-        {/* NEW: Floating Geometric Shapes */}
-        {[1, 2, 3, 4].map((i) => (
-          <motion.div
-            key={`shape-${i}`}
-            className="absolute"
-            animate={particleFloat.animate}
-            style={{
-              left: `${15 + i * 20}%`,
-              top: `${20 + i * 15}%`,
-              width: '30px',
-              height: '30px',
-              background: `linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05))`,
-              border: '1px solid rgba(16, 185, 129, 0.2)',
-              borderRadius: i % 2 === 0 ? '50%' : '4px',
-              filter: 'blur(0.5px)',
-            }}
-          />
-        ))}
+        {/* Interactive Particles - Optimized for mobile */}
+{typeof window !== 'undefined' && window.innerWidth >= 768 && (
+  <>
+    {particles.slice(0, 20).map((particle) => (
+      <motion.div
+        key={particle.id}
+        className="absolute hidden md:block"
+        initial={{
+          x: `${particle.x}vw`,
+          y: `${particle.y}vh`,
+          opacity: particle.opacity
+        }}
+        animate={{
+          x: `${particle.x + Math.sin(particle.id * 0.1) * 10}vw`,
+          y: `${particle.y + Math.cos(particle.id * 0.1) * 10}vh`,
+          opacity: [particle.opacity, particle.opacity * 0.5, particle.opacity]
+        }}
+        transition={{
+          duration: particle.speed * 4,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+        style={{
+          width: `${particle.size}px`,
+          height: `${particle.size}px`,
+          background: `radial-gradient(circle, rgba(16, 185, 129, ${particle.opacity}) 0%, transparent 70%)`,
+          filter: 'blur(0.5px)',
+        }}
+      />
+    ))}
+  </>
+)}
+       {/* NEW: Floating Geometric Shapes - Desktop Only */}
+{typeof window !== 'undefined' && window.innerWidth >= 768 && (
+  <>
+    {[1, 2, 3, 4].map((i) => (
+      <motion.div
+        key={`shape-${i}`}
+        className="absolute hidden md:block"
+        animate={particleFloat.animate}
+        style={{
+          left: `${15 + i * 20}%`,
+          top: `${20 + i * 15}%`,
+          width: '30px',
+          height: '30px',
+          background: `linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05))`,
+          border: '1px solid rgba(16, 185, 129, 0.2)',
+          borderRadius: i % 2 === 0 ? '50%' : '4px',
+          filter: 'blur(0.5px)',
+        }}
+      />
+    ))}
+  </>
+)}
         
         {/* Animated Gradient Mesh */}
         <div className="absolute inset-0 opacity-10">
@@ -2132,31 +2139,35 @@ export default function CryonexPage() {
               >
                 {/* Video Player or Thumbnail */}
                 <div className="relative aspect-video bg-gradient-to-br from-gray-900 to-black overflow-hidden">
-                  {activeVideo === video.id ? (
-                    <div className="relative w-full h-full">
-                      {video.id === 1 ? (
-                        // Google Drive video iframe
-                        <iframe
-                          src={`https://drive.google.com/file/d/1Ga-Uy7yq17qgqn5FS8Ht1sSWrCSPwbY-/preview`}
-                          className="w-full h-full"
-                          allow="autoplay; encrypted-media"
-                          allowFullScreen
-                          title={video.title}
-                          style={{ maxHeight: '400px' }}
-                        />
-                      ) : (
-                        // Regular video element
-                        <video
-                          ref={el => videoRefs.current[video.id] = el}
-                          src={video.video}
-                          className="w-full h-full object-cover"
-                          onEnded={handleVideoEnd}
-                          controls={videoPlaying}
-                          poster={videoThumbnails[video.id]}
-                          style={{ maxHeight: '400px' }}
-                        />
-                      )}
-                    </div>
+                 {activeVideo === video.id ? (
+  <div className="relative w-full h-full">
+    {video.id === 1 ? (
+      // Google Drive video iframe - optimized for mobile
+      <iframe
+        src={`https://drive.google.com/file/d/1Ga-Uy7yq17qgqn5FS8Ht1sSWrCSPwbY-/preview`}
+        className="w-full h-full"
+        allow="autoplay; encrypted-media"
+        allowFullScreen
+        title={video.title}
+        loading="lazy"
+        style={{ maxHeight: '400px' }}
+      />
+    ) : (
+      // Regular video element - use mobile optimized version
+      <video
+        ref={el => videoRefs.current[video.id] = el}
+        src={typeof window !== 'undefined' && window.innerWidth < 768 ? 
+          (video.mobileVideo || video.video) : video.video}
+        className="w-full h-full object-cover"
+        onEnded={handleVideoEnd}
+        controls={videoPlaying}
+        poster={videoThumbnails[video.id]}
+        style={{ maxHeight: '400px' }}
+        playsInline
+        preload="metadata"
+      />
+    )}
+  </div>
                   ) : (
                     <div className="relative w-full h-full group">
                       {/* Video Thumbnail with generated preview */}
@@ -3653,6 +3664,67 @@ export default function CryonexPage() {
           width: 10px;
           height: 10px;
         }
+          /* Mobile Performance Optimizations */
+@media (max-width: 767px) {
+  /* Reduce animations on mobile */
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  /* Disable complex animations */
+  .complex-animation,
+  .floating-animation,
+  [class*="animate-"] {
+    animation: none !important;
+  }
+  
+  /* Reduce backdrop blur for performance */
+  .backdrop-blur-xl,
+  .backdrop-blur-lg {
+    backdrop-filter: blur(5px) !important;
+    -webkit-backdrop-filter: blur(5px) !important;
+  }
+  
+  /* Optimize images */
+  img, video {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Reduce shadows */
+  .shadow-xl,
+  .shadow-2xl {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  /* Disable 3D transforms */
+  .transform-3d {
+    transform: none !important;
+  }
+}
+
+/* Prevent layout shifts */
+img, video, iframe {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Optimize videos for mobile */
+video {
+  background: black;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Disable will-change on mobile */
+@media (max-width: 767px) {
+  [style*="will-change"] {
+    will-change: auto !important;
+  }
+}
         
         ::-webkit-scrollbar-track {
           background: rgba(30, 30, 30, 0.5);

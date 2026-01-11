@@ -1071,12 +1071,12 @@ export default function CryonexPage() {
       </div>
 
       {/* Navigation Bar - Enhanced with glow */}
-      <motion.nav 
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 100, damping: 20 }}
-        className="fixed top-0 w-full z-50 flex justify-between items-center px-4 py-3 backdrop-blur-xl bg-gradient-to-b from-gray-800/95 to-gray-900/90 border-b border-white/5 shadow-2xl shadow-emerald-500/5"
-      >
+<motion.nav 
+  initial={{ y: -100 }}
+  animate={{ y: 0 }}
+  transition={{ type: "spring", stiffness: 100, damping: 20 }}
+  className="fixed top-0 w-full z-50 flex justify-between items-center px-4 py-2 md:py-3 backdrop-blur-xl bg-gradient-to-b from-gray-800/95 to-gray-900/90 border-b border-white/5 shadow-2xl shadow-emerald-500/5"
+>
         <motion.div 
           className="flex items-center gap-2 group"
           whileHover={{ scale: 1.03 }}
@@ -1085,25 +1085,25 @@ export default function CryonexPage() {
             animate={rotate3D.animate}
             className="relative"
           >
-            <div className="relative w-8 h-8 bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-400 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <Snowflake className="w-4 h-4 text-white" />
-            </div>
+           <div className="relative w-8 h-8 md:w-8 md:h-8 bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-400 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20">
+  <Snowflake className="w-4 h-4 md:w-4 md:h-4 text-white" />
+</div>
           </motion.div>
           <div>
-            <motion.h1 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-lg font-bold tracking-tight"
-              style={{
-                background: 'linear-gradient(135deg, #10b981 0%, #0d9488 50%, #14b8a6 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                letterSpacing: '0.05em'
-              }}
-            >
-              CRYONEX
-            </motion.h1>
-            <p className="text-[10px] text-gray-400 -mt-0.5 tracking-widest">CLIMATE SYSTEMS</p>
+           <motion.h1 
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  className="text-base md:text-lg font-bold tracking-tight"
+  style={{
+    background: 'linear-gradient(135deg, #10b981 0%, #0d9488 50%, #14b8a6 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    letterSpacing: '0.05em'
+  }}
+>
+  CRYONEX
+</motion.h1>
+<p className="text-[8px] md:text-[10px] text-gray-400 -mt-0.5 tracking-widest">CLIMATE SYSTEMS</p>
           </div>
         </motion.div>
         
@@ -1224,7 +1224,7 @@ export default function CryonexPage() {
       </motion.nav>
 
      {/* Hero Section - Enhanced with taller mobile height */}
-<section className="relative min-h-[85vh] md:min-h-[98vh] flex items-center justify-center overflow-hidden pt-16 px-4">
+<section className="relative min-h-[85vh] md:min-h-[98vh] flex items-center justify-center overflow-hidden pt-14 px-4">
   {/* Background with professional image */}
   <div className="absolute inset-0">
     <div className="absolute inset-0 bg-gradient-to-br from-gray-800/10 via-gray-900/10 to-gray-800/10 z-10" />

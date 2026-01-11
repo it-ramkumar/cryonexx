@@ -849,49 +849,51 @@ export default function CryonexPage() {
   return (
     <div className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white font-sans overflow-x-hidden relative">
       
-      {/* NEW: Custom Cursor Effect */}
-      <AnimatePresence>
-        {isCursorVisible && (
+      {/* NEW: Custom Cursor Effect - Desktop Only */}
+{typeof window !== 'undefined' && window.innerWidth >= 768 && (
+  <AnimatePresence>
+    {isCursorVisible && (
+      <motion.div
+        variants={cursorVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        className="fixed pointer-events-none z-[9999] mix-blend-difference hidden md:block"
+        style={{
+          left: `${cursorPosition.x}px`,
+          top: `${cursorPosition.y}px`,
+        }}
+      >
+        <div className="relative">
           <motion.div
-            variants={cursorVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            className="fixed pointer-events-none z-[9999] mix-blend-difference"
-            style={{
-              left: `${cursorPosition.x}px`,
-              top: `${cursorPosition.y}px`,
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, 90, 0],
             }}
-          >
-            <div className="relative">
-              <motion.div
-                animate={{
-                  scale: [1, 1.2, 1],
-                  rotate: [0, 90, 0],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="w-6 h-6 border-2 border-emerald-400/70 rounded-full"
-              />
-              <motion.div
-                animate={{
-                  scale: [1.2, 1.4, 1.2],
-                  opacity: [0.3, 0.5, 0.3],
-                }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="absolute inset-0 w-6 h-6 border-2 border-teal-400/50 rounded-full"
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="w-6 h-6 border-2 border-emerald-400/70 rounded-full"
+          />
+          <motion.div
+            animate={{
+              scale: [1.2, 1.4, 1.2],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="absolute inset-0 w-6 h-6 border-2 border-teal-400/50 rounded-full"
+          />
+        </div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+)}
 
       {/* NEW: Enhanced Geometric Pattern Background with interactive particles */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
@@ -3582,7 +3584,7 @@ export default function CryonexPage() {
                 className="text-center md:text-left"
               >
                 <div className="text-gray-400 text-sm font-sans">
-                  <p>© 2024 Cryonex Climate Systems. All rights reserved.</p>
+                  <p>© 2026 Cryonex Systems. All rights reserved.</p>
                   <p className="mt-1 text-xs text-gray-500 font-sans">Comfort in every climate</p>
                 </div>
               </motion.div>

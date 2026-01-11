@@ -1223,230 +1223,235 @@ export default function CryonexPage() {
         </AnimatePresence>
       </motion.nav>
 
-      {/* Hero Section - Enhanced with floating elements */}
-      <section className="relative min-h-[98vh] flex items-center justify-center overflow-hidden pt-16 px-4">
-        {/* Background with professional image */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-800/10 via-gray-900/10 to-gray-800/10 z-10" />
-          
-          {/* Professional Hero Image */}
-          <motion.div 
-            className="absolute inset-0"
-            initial={{ scale: 1.2 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 1.5, ease: "easeOut" }}
+     {/* Hero Section - Enhanced with taller mobile height */}
+<section className="relative min-h-[85vh] md:min-h-[98vh] flex items-center justify-center overflow-hidden pt-16 px-4">
+  {/* Background with professional image */}
+  <div className="absolute inset-0">
+    <div className="absolute inset-0 bg-gradient-to-br from-gray-800/10 via-gray-900/10 to-gray-800/10 z-10" />
+    
+    {/* Professional Hero Image - Optimized for mobile height */}
+    <motion.div 
+      className="absolute inset-0"
+      initial={{ scale: 1.2 }}
+      animate={{ scale: 1 }}
+      transition={{ duration: 1.5, ease: "easeOut" }}
+    >
+      <img 
+        src={productImages[2]}  
+        alt="Cryonex Climate Systems"
+        className="w-full h-full object-cover object-center brightness-[0.6] md:brightness-[0.6]"
+        loading="eager"
+        style={{ 
+          objectPosition: 'center 30%',
+          height: '100%',
+          width: '100%'
+        }}
+      />
+    </motion.div>
+    
+    {/* Enhanced Gradient Overlay for better text readability */}
+    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/40 to-gray-900/30 z-20 md:from-gray-900/70 md:via-gray-900/40 md:to-gray-900/70" />
+    <div className="absolute inset-0 bg-gradient-to-b from-gray-900/60 via-transparent to-gray-900/50 z-20 md:from-gray-900/50 md:via-transparent md:to-gray-900/60" />
+    
+    {/* Side gradient overlays for better focus */}
+    <div className="absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-gray-900/60 to-transparent z-20" />
+    <div className="absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-gray-900/60 to-transparent z-20" />
+    
+    {/* NEW: Floating Tech Elements - Desktop Only */}
+    {typeof window !== 'undefined' && window.innerWidth >= 1024 && (
+      <>
+        {[1, 2, 3].map((i) => (
+          <motion.div
+            key={i}
+            className="absolute z-30 hidden lg:block"
+            initial={{
+              x: Math.random() * 100 + 'vw',
+              y: Math.random() * 100 + 'vh',
+              rotate: Math.random() * 360
+            }}
+            animate={{
+              y: [null, Math.random() * 100 + 'vh'],
+              rotate: [null, 360],
+              opacity: [0.1, 0.3, 0.1],
+              scale: [1, 1.2, 1]
+            }}
+            transition={{
+              duration: Math.random() * 20 + 15,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+            style={{
+              width: '24px',
+              height: '24px',
+            }}
           >
-            <img 
-              src={productImages[2]}  
-              alt="Cryonex Climate Systems"
-              className="w-full h-full object-cover object-center brightness-[0.6]"
-              loading="eager"
-            />
-          </motion.div>
-          
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900/70 via-gray-900/40 to-gray-900/70 z-20" />
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-900/50 via-transparent to-gray-900/60 z-20" />
-          
-          {/* NEW: Floating Tech Elements with enhanced animations */}
-          {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-            <motion.div
-              key={i}
-              className="absolute z-30 hidden lg:block"
-              initial={{
-                x: Math.random() * 100 + 'vw',
-                y: Math.random() * 100 + 'vh',
-                rotate: Math.random() * 360
-              }}
-              animate={{
-                y: [null, Math.random() * 100 + 'vh'],
-                rotate: [null, 360],
-                opacity: [0.1, 0.3, 0.1],
-                scale: [1, 1.2, 1]
-              }}
-              transition={{
-                duration: Math.random() * 20 + 15,
-                repeat: Infinity,
-                ease: "linear"
-              }}
-              style={{
-                width: '24px',
-                height: '24px',
-              }}
-            >
-              <div className="w-full h-full bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-emerald-400/30">
-                {i % 3 === 0 ? (
-                  <Snowflake className="w-3 h-3 text-emerald-300" />
-                ) : i % 3 === 1 ? (
-                  <Zap className="w-3 h-3 text-cyan-300" />
-                ) : (
-                  <Cpu className="w-3 h-3 text-teal-300" />
-                )}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Hero Content */}
-        <div className="relative z-40 w-full max-w-6xl mx-auto px-4 mt-8">
-          <motion.div 
-            initial="hidden"
-            animate="visible"
-            variants={fadeInUp}
-            className="text-center"
-          >
-            {/* Premium Badge with Pulse Effect */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10, scale: 0.8 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: 0.2, type: "spring" }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-emerald-600/40 to-teal-600/40 border border-emerald-400/40 backdrop-blur-xl text-white font-bold tracking-[0.1em] text-xs uppercase mb-6 shadow-xl group relative overflow-hidden"
-            >
-              {/* Shimmer Effect */}
-              <motion.div
-                variants={shimmerEffect}
-                animate="animate"
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-              />
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-              >
-                <Snowflake className="w-3 h-3 text-white relative z-10" />
-              </motion.div>
-              <span className="text-white font-bold drop-shadow-lg relative z-10">
-                Professional Climate Solutions
-              </span>
-              <motion.div
-                animate={{ rotate: -360 }}
-                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-              >
-                <Award className="w-3 h-3 text-white relative z-10" />
-              </motion.div>
-            </motion.div>
-            
-            {/* Main Title with Enhanced Gradient */}
-            <div className="relative mb-4">
-              <motion.h1 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-4xl md:text-5xl lg:text-6xl font-bold mb-2 tracking-tight px-2 font-serif"
-              >
-                <span className="relative">
-                  <span className="bg-gradient-to-r from-emerald-100 via-teal-100 to-cyan-100 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                    CRYONEX
-                  </span>
-                </span>
-                <br />
-                <span className="text-2xl md:text-4xl text-white font-bold drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] font-sans">
-                  CLIMATE CONTROL SYSTEMS
-                </span>
-              </motion.h1>
+            <div className="w-full h-full bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-emerald-400/30">
+              {i % 3 === 0 ? (
+                <Snowflake className="w-3 h-3 text-emerald-300" />
+              ) : i % 3 === 1 ? (
+                <Zap className="w-3 h-3 text-cyan-300" />
+              ) : (
+                <Cpu className="w-3 h-3 text-teal-300" />
+              )}
             </div>
-            
-            {/* Subtitle with Enhanced Effects */}
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="mb-4"
-            >
-              <div className="flex items-center justify-center gap-3 mb-4">
-                <div className="w-12 h-px bg-gradient-to-r from-transparent via-emerald-300 to-transparent shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                <motion.span 
-                  animate={floatingText.animate}
-                  className="text-base md:text-lg text-white font-medium tracking-wide px-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-sans"
-                >
-                  Professional Climate Solutions for Mobile Living
-                </motion.span>
-                <div className="w-12 h-px bg-gradient-to-r from-transparent via-emerald-300 to-transparent shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-              </div>
-            </motion.div>
-            
-            {/* Description with Breathing Effect */}
-            <motion.p 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              variants={breathingEffect}
-              className="text-sm md:text-base text-white/90 mb-6 max-w-2xl mx-auto leading-relaxed px-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)] font-medium font-sans"
-            >
-              Premium refrigeration, ventilation, and climate systems engineered for exceptional performance in mobile environments.
-            </motion.p>
-            
-            {/* CTA Buttons with Enhanced Effects */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center items-center px-2"
-            >
-              <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={(e) => {
-                  handleScrollTo('product-showcase');
-                  handleRippleClick(e);
-                }}
-                className="group relative bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 text-white px-6 py-3 rounded-xl text-sm font-bold hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] transition-all duration-300 overflow-hidden border border-emerald-400 shadow-2xl w-full sm:w-auto font-sans"
-              >
-                {/* Animated Background */}
-                <motion.div 
-                  className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-white/10 to-cyan-500/0"
-                  animate={{ 
-                    x: ['-100%', '100%']
-                  }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                />
-                {/* Pulse Effect */}
-                <motion.div
-                  variants={pulseGlow}
-                  animate="animate"
-                  className="absolute inset-0 rounded-xl"
-                />
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  <ThermometerSun className="w-4 h-4" />
-                  <span className="font-bold">Explore Products</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
-                </span>
-              </motion.button>
-              
-              <motion.button
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={(e) => {
-                  handleScrollTo('installation');
-                  handleRippleClick(e);
-                }}
-                className="group relative bg-gradient-to-br from-white/10 via-white/5 to-white/10 backdrop-blur-lg border border-white/30 text-white px-6 py-3 rounded-xl text-sm font-bold hover:border-emerald-400/60 hover:bg-white/15 hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-all duration-300 shadow-lg w-full sm:w-auto font-sans"
-              >
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  <Video className="w-4 h-4" />
-                  <span className="font-bold">View Installation</span>
-                </span>
-              </motion.button>
-            </motion.div>
           </motion.div>
-        </div>
+        ))}
+      </>
+    )}
+  </div>
 
-        {/* Scroll Indicator with Enhanced Animation */}
-        <motion.div 
-          animate={{ y: [0, 8, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="absolute bottom-2 left-1/2 transform -translate-x-1/2 hidden sm:block z-40"
+  {/* Hero Content - Optimized for mobile */}
+  <div className="relative z-40 w-full max-w-6xl mx-auto px-4 md:px-6">
+    <motion.div 
+      initial="hidden"
+      animate="visible"
+      variants={fadeInUp}
+      className="text-center"
+    >
+      {/* Premium Badge with Pulse Effect */}
+      <motion.div 
+        initial={{ opacity: 0, y: 10, scale: 0.8 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ delay: 0.2, type: "spring" }}
+        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-emerald-600/40 to-teal-600/40 border border-emerald-400/40 backdrop-blur-xl text-white font-bold tracking-[0.1em] text-xs uppercase mb-6 md:mb-8 shadow-xl group relative overflow-hidden"
+      >
+        {/* Shimmer Effect */}
+        <motion.div
+          variants={shimmerEffect}
+          animate="animate"
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+        />
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
         >
-          <div className="relative">
-            <div className="w-6 h-8 border border-emerald-400/30 rounded-full flex justify-center backdrop-blur-sm bg-black/10">
-              <motion.div 
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ repeat: Infinity, duration: 2 }}
-                className="w-1 h-3 bg-gradient-to-b from-emerald-200 to-teal-200 rounded-full mt-1.5"
-              />
-            </div>
-          </div>
+          <Snowflake className="w-3 h-3 text-white relative z-10" />
         </motion.div>
-      </section>
+        <span className="text-white font-bold drop-shadow-lg relative z-10">
+          Professional Climate Solutions
+        </span>
+        <motion.div
+          animate={{ rotate: -360 }}
+          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+        >
+          <Award className="w-3 h-3 text-white relative z-10" />
+        </motion.div>
+      </motion.div>
+      
+      {/* Main Title with Enhanced Gradient - Mobile Optimized */}
+      <div className="relative mb-4 md:mb-6">
+        <motion.h1 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="text-4xl md:text-5xl lg:text-6xl font-bold mb-2 tracking-tight px-2 md:px-4 font-serif"
+        >
+          <span className="relative block mb-2 md:mb-3">
+            <span className="bg-gradient-to-r from-emerald-100 via-teal-100 to-cyan-100 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+              CRYONEX
+            </span>
+          </span>
+          <span className="text-xl md:text-3xl lg:text-4xl text-white font-bold drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] font-sans block leading-tight">
+            CLIMATE CONTROL SYSTEMS
+          </span>
+        </motion.h1>
+      </div>
+      
+      {/* Subtitle with Enhanced Effects */}
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        className="mb-4 md:mb-6"
+      >
+        <div className="flex items-center justify-center gap-2 md:gap-3 mb-4">
+          <div className="w-8 md:w-12 h-px bg-gradient-to-r from-transparent via-emerald-300 to-transparent shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+          <motion.span 
+            animate={floatingText.animate}
+            className="text-sm md:text-base lg:text-lg text-white font-medium tracking-wide px-1 md:px-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-sans"
+          >
+            Professional Climate Solutions
+          </motion.span>
+          <div className="w-8 md:w-12 h-px bg-gradient-to-r from-transparent via-emerald-300 to-transparent shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+        </div>
+        <motion.span 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="text-sm text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)] font-medium font-sans block"
+        >
+          For Mobile Living
+        </motion.span>
+      </motion.div>
+      
+      {/* Description with Breathing Effect */}
+      <motion.p 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        variants={breathingEffect}
+        className="text-sm md:text-base text-white/90 mb-6 md:mb-8 max-w-2xl mx-auto leading-relaxed px-3 md:px-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)] font-medium font-sans"
+      >
+        Premium refrigeration, ventilation, and climate systems engineered for exceptional performance in mobile environments.
+      </motion.p>
+      
+      {/* CTA Buttons with Enhanced Effects */}
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center items-center px-2 md:px-4"
+      >
+        <motion.button
+          whileHover={{ scale: 1.05, y: -2 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={(e) => {
+            handleScrollTo('product-showcase');
+            handleRippleClick(e);
+          }}
+          className="group relative bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 text-white px-5 md:px-6 py-3 md:py-3.5 rounded-xl text-sm font-bold hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] transition-all duration-300 overflow-hidden border border-emerald-400 shadow-2xl w-full sm:w-auto font-sans"
+        >
+          {/* Animated Background */}
+          <motion.div 
+            className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-white/10 to-cyan-500/0"
+            animate={{ 
+              x: ['-100%', '100%']
+            }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+          />
+          {/* Pulse Effect */}
+          <motion.div
+            variants={pulseGlow}
+            animate="animate"
+            className="absolute inset-0 rounded-xl"
+          />
+          <span className="relative z-10 flex items-center justify-center gap-2">
+            <ThermometerSun className="w-4 h-4" />
+            <span className="font-bold">Explore Products</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+          </span>
+        </motion.button>
+        
+        <motion.button
+          whileHover={{ scale: 1.05, y: -2 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={(e) => {
+            handleScrollTo('installation');
+            handleRippleClick(e);
+          }}
+          className="group relative bg-gradient-to-br from-white/10 via-white/5 to-white/10 backdrop-blur-lg border border-white/30 text-white px-5 md:px-6 py-3 md:py-3.5 rounded-xl text-sm font-bold hover:border-emerald-400/60 hover:bg-white/15 hover:shadow-[0_0_25px_rgba(255,255,255,0.2)] transition-all duration-300 shadow-lg w-full sm:w-auto font-sans"
+        >
+          <span className="relative z-10 flex items-center justify-center gap-2">
+            <Video className="w-4 h-4" />
+            <span className="font-bold">View Installation</span>
+          </span>
+        </motion.button>
+      </motion.div>
+    </motion.div>
+  </div>
+
+  
+</section>
 
       {/* Main Content Container */}
       <div className="relative z-10 max-w-6xl mx-auto px-4 py-12 md:py-16">

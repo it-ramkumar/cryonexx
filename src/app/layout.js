@@ -22,7 +22,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/fav-icon2.png" type="image/png" />
+        <link rel="icon" href="/fav-icon3.png" type="image/png" />
         <link rel="apple-touch-icon" href="/fav-icon3.png" />
         <meta                                                                                                                                                                                                                                                                                                                                                                                                                                                                          name="viewport" content="width=device-width, initial-scale=1" />
       </head>

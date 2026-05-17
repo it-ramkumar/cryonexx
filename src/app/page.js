@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
 import {
   Snowflake, Wind, ThermometerSun, Zap, Battery, Volume2,
@@ -8,25 +8,25 @@ import {
   ChevronLeft, ChevronRight, ChevronDown,
   Menu, X, Instagram, Facebook, Mail, Phone, MapPin, Clock as ClockIcon,
   Plus, Minus, Send, Cpu, Layers, Award, Wrench,
-  Maximize, Hash, Sun, Cloud, Compass, Star, Quote, Sparkles,
-  Gauge, Activity, Radio, Mountain,
-  ArrowDown
+  Maximize, Hash, Sun, Cloud, Compass, Sparkles,
+  Gauge, Activity, Calculator, TrendingUp, Sliders, AlertCircle,
+  ArrowDown, Info, Power
 } from 'lucide-react';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    IMAGE PATHS
-   - Hero: /images/c3.png  (your existing hero from the current site)
-   - Product images: /images/cryonex/<key>-<n>.webp  (run download script)
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const IMG = (key, i) => `/images/cryonex/${key}-${i}.webp`;
 const imgs = (key, count) => Array.from({ length: count }, (_, i) => IMG(key, i + 1));
 
 const HERO_IMAGE = '/images/c3.png';
+// Background image used behind the green-tinted sections.
+// Reuses the hero image you already have so no new asset is required.
+const SECTION_BG_IMAGE = '/images/c3.png';
 
 /* ═══════════════════════════════════════════════════════════════════════════
    LINKS — Van Parts Outlet
-   NOTE: shopAll / all "HVAC" text-anchored links now point to the Ventilation page
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const SHOP_BASE = 'https://vanpartsoutlet.com';
@@ -34,7 +34,7 @@ const VENTILATION_PAGE = `${SHOP_BASE}/pages/ventilation`;
 const productUrl = (handle) => `${SHOP_BASE}/products/${handle}`;
 
 const LINKS = {
-  shopAll: VENTILATION_PAGE,   // ← Shop HVAC button + footer "HVAC products" link
+  shopAll: VENTILATION_PAGE,
   ventilation: VENTILATION_PAGE,
   contact: `${SHOP_BASE}/pages/contact`,
   about: `${SHOP_BASE}/pages/about-us`,
@@ -207,38 +207,7 @@ const SPECS_TABLE = [
 ];
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   NEW SECTION — Field Reports (testimonials/builders)
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-const FIELD_REPORTS = [
-  {
-    quote:
-      'The X700 changed our summer game completely. We crossed the Mojave in 110°F and the cabin held 72°F all night — solar kept up the next morning. No inverter, no drama.',
-    author: 'Marcus & Lena T.',
-    rig: 'Sprinter 144" High-Roof · 600Ah LiFePO4',
-    location: 'Phoenix, AZ',
-    rating: 5,
-  },
-  {
-    quote:
-      'Installed the BC83A in our Transit build last spring. 50W draw is real — our 400Ah bank barely notices it. The locking latch has saved our food more times than I can count on forest roads.',
-    author: 'Priya & Devon K.',
-    rig: 'Ford Transit 148" EL · 400Ah Bank',
-    location: 'Bozeman, MT',
-    rating: 5,
-  },
-  {
-    quote:
-      'Best vent fan I have used in three van builds. The blackout curtain alone is worth the price — pulling out a separate window cover every morning was killing me. Wireless remote is a game-changer.',
-    author: 'Casey R.',
-    rig: 'ProMaster 159" · DIY Conversion',
-    location: 'Bend, OR',
-    rating: 5,
-  },
-];
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   NEW SECTION — Performance metrics for the live counter widget
+   PERFORMANCE METRICS for the live counter widget
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const LIVE_METRICS = [
@@ -249,7 +218,44 @@ const LIVE_METRICS = [
 ];
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   THEME — Light editorial palette
+   POWER BUDGET CALCULATOR DATA
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const SYSTEMS = [
+  {
+    id: 'ac-x700',
+    name: 'X700 Rooftop AC',
+    sub: '8,200 BTU · 12V DC',
+    watts: 420,
+    peakWatts: 840,
+    icon: <Snowflake className="w-4 h-4" strokeWidth={1.6} />,
+    color: '#0d5a4f',
+    handle: 'cryonex-x700-roof-top-ac-unit-12v',
+  },
+  {
+    id: 'fridge-bc83a',
+    name: 'BC83A Fridge',
+    sub: '83 L · 50W cont.',
+    watts: 20,
+    peakWatts: 50,
+    icon: <Wind className="w-4 h-4" strokeWidth={1.6} />,
+    color: '#0d5a4f',
+    handle: 'cyonex-bc83a-83l-12-24v-compressor-fridge',
+  },
+  {
+    id: 'vent-fan',
+    name: 'Roof Vent Fan',
+    sub: '10-speed · variable',
+    watts: 12,
+    peakWatts: 30,
+    icon: <Wind className="w-4 h-4" strokeWidth={1.6} />,
+    color: '#0d5a4f',
+    handle: 'cryonex-roof-ventilation-fan-14-x-14-rv-van-roof-vent',
+  },
+];
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THEME — Light editorial palette + extended green tones for tinted sections
    ═══════════════════════════════════════════════════════════════════════════ */
 
 const COLORS = {
@@ -263,6 +269,15 @@ const COLORS = {
   accent:     '#0d5a4f',
   accentSoft: '#d1ddd9',
   copper:     '#9a4d2e',
+  warn:       '#b45309',
+
+  // ── Extended greenish palette for the tinted sections ──
+  greenLight:   '#eef4f1',   // soft sage wash — barely-there pale green
+  greenMid:     '#c9d9d2',   // mid-tone sage — used for borders/rules on green sections
+  greenDeep:    '#0a4a40',   // a hair darker than accent — for deep section backgrounds
+  greenDeeper:  '#073830',   // even darker green for high-contrast areas
+  greenInk:     '#e8f1ed',   // text colour on dark green backgrounds (high contrast)
+  greenMuted:   '#9ab5ab',   // muted text on dark green
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -279,13 +294,8 @@ const staggerParent = {
   visible: { transition: { staggerChildren: 0.08 } },
 };
 
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.9, ease: 'easeOut' } },
-};
-
 /* ═══════════════════════════════════════════════════════════════════════════
-   ANIMATED COUNTER — counts to value when in view
+   ANIMATED COUNTER
    ═══════════════════════════════════════════════════════════════════════════ */
 
 function Counter({ to, suffix = '', duration = 1.8 }) {
@@ -324,7 +334,7 @@ function Counter({ to, suffix = '', duration = 1.8 }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   MAGNETIC BUTTON WRAPPER — subtle attraction on hover
+   MAGNETIC BUTTON WRAPPER
    ═══════════════════════════════════════════════════════════════════════════ */
 
 function Magnetic({ children, strength = 0.25 }) {
@@ -354,7 +364,7 @@ function Magnetic({ children, strength = 0.25 }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   SCROLL PROGRESS BAR — top of page
+   SCROLL PROGRESS BAR
    ═══════════════════════════════════════════════════════════════════════════ */
 
 function ScrollProgress() {
@@ -389,11 +399,11 @@ function Gallery({ images, name }) {
             key={i}
             src={safe[i]}
             alt={`${name} — view ${i + 1}`}
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.02 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
+            className="absolute inset-0 w-full h-full object-cover"
             loading="lazy"
           />
         </AnimatePresence>
@@ -449,6 +459,399 @@ function Gallery({ images, name }) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   POWER BUDGET CALCULATOR — interactive section
+   This now renders ON the dark-green section, so all internal surfaces have
+   been re-skinned to keep the legibility high on a deep green background.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+function PowerCalculator() {
+  const [selected, setSelected] = useState({
+    'ac-x700': true,
+    'fridge-bc83a': true,
+    'vent-fan': true,
+  });
+  const [batteryAh, setBatteryAh] = useState(300);
+  const [solarW, setSolarW] = useState(400);
+  const [acHoursPerDay, setAcHoursPerDay] = useState(6);
+
+  const toggle = (id) => setSelected((s) => ({ ...s, [id]: !s[id] }));
+
+  const result = useMemo(() => {
+    let dailyWh = 0;
+    let peakW = 0;
+    const breakdown = [];
+
+    SYSTEMS.forEach((s) => {
+      if (!selected[s.id]) return;
+      let hours;
+      if (s.id === 'ac-x700') hours = acHoursPerDay;
+      else if (s.id === 'fridge-bc83a') hours = 24;
+      else hours = 8;
+      const wh = s.watts * hours;
+      dailyWh += wh;
+      peakW += s.peakWatts;
+      breakdown.push({ id: s.id, name: s.name, wh, hours });
+    });
+
+    const usableWh = batteryAh * 12 * 0.8;
+    const solarWhPerDay = solarW * 4.5 * 0.75;
+    const netDailyWh = dailyWh - solarWhPerDay;
+
+    let daysOffGrid;
+    if (netDailyWh <= 0) {
+      daysOffGrid = Infinity;
+    } else {
+      daysOffGrid = usableWh / netDailyWh;
+    }
+
+    const runtimeHrsNoSolar = dailyWh > 0 ? (usableWh / (dailyWh / 24)) : Infinity;
+
+    return {
+      dailyWh: Math.round(dailyWh),
+      peakW: Math.round(peakW),
+      usableWh: Math.round(usableWh),
+      solarWhPerDay: Math.round(solarWhPerDay),
+      netDailyWh: Math.round(netDailyWh),
+      daysOffGrid,
+      runtimeHrsNoSolar,
+      breakdown,
+    };
+  }, [selected, batteryAh, solarW, acHoursPerDay]);
+
+  const surplus = result.netDailyWh <= 0;
+  const anySelected = Object.values(selected).some(Boolean);
+
+  const drawBarWidth = Math.min(100, (result.dailyWh / Math.max(result.usableWh, 1)) * 100);
+  const solarBarWidth = Math.min(100, (result.solarWhPerDay / Math.max(result.usableWh, 1)) * 100);
+
+  // Tints used inside the calculator (this whole component lives on a deep green section)
+  const cardBg = 'rgba(255,255,255,0.06)';
+  const cardBgActive = 'rgba(255,255,255,0.12)';
+  const greenRule = 'rgba(255,255,255,0.14)';
+  const greenRuleSoft = 'rgba(255,255,255,0.08)';
+  const greenText = COLORS.greenInk;
+  const greenTextMuted = COLORS.greenMuted;
+  const greenTextSoft = 'rgba(232,241,237,0.78)';
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+      {/* LEFT — Inputs */}
+      <div className="lg:col-span-5 space-y-8">
+        {/* System selector */}
+        <div>
+          <div className="ed-label mb-4 flex items-center gap-2" style={{ color: greenTextMuted }}>
+            <Sliders className="w-3.5 h-3.5" />
+            Step 01 — Select systems
+          </div>
+          <div className="space-y-2">
+            {SYSTEMS.map((s) => {
+              const on = selected[s.id];
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => toggle(s.id)}
+                  className="w-full flex items-center gap-4 p-4 text-left transition-all"
+                  style={{
+                    background: on ? cardBgActive : cardBg,
+                    border: `1px solid ${on ? '#7dd3c0' : greenRule}`,
+                  }}
+                >
+                  <div
+                    className="w-9 h-9 flex items-center justify-center flex-shrink-0 transition-colors"
+                    style={{
+                      background: on ? '#7dd3c0' : 'rgba(255,255,255,0.08)',
+                      color: on ? COLORS.greenDeeper : greenText,
+                      border: `1px solid ${on ? '#7dd3c0' : greenRule}`,
+                    }}
+                  >
+                    {s.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="ed-display text-[14px]" style={{ color: greenText, fontWeight: 600 }}>
+                      {s.name}
+                    </div>
+                    <div className="ed-mono text-[10px] mt-0.5" style={{ color: greenTextMuted }}>
+                      {s.sub.toUpperCase()} · AVG {s.watts}W
+                    </div>
+                  </div>
+                  <div
+                    className="w-5 h-5 flex items-center justify-center flex-shrink-0"
+                    style={{
+                      background: on ? '#7dd3c0' : 'transparent',
+                      border: `1.5px solid ${on ? '#7dd3c0' : greenRule}`,
+                    }}
+                  >
+                    {on && <CheckCircle className="w-3 h-3" style={{ color: COLORS.greenDeeper }} strokeWidth={2.5} />}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* AC runtime slider */}
+        {selected['ac-x700'] && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className="ed-label flex items-center gap-2" style={{ color: greenTextMuted }}>
+                <ClockIcon className="w-3.5 h-3.5" />
+                AC runtime per day
+              </div>
+              <div className="ed-mono text-[13px]" style={{ color: greenText, fontWeight: 600 }}>
+                {acHoursPerDay}h
+              </div>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={12}
+              step={1}
+              value={acHoursPerDay}
+              onChange={(e) => setAcHoursPerDay(Number(e.target.value))}
+              className="cryo-slider cryo-slider-dark w-full"
+            />
+            <div className="flex justify-between mt-1.5 ed-mono text-[10px]" style={{ color: greenTextMuted }}>
+              <span>0h</span>
+              <span>6h</span>
+              <span>12h</span>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Battery slider */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <div className="ed-label flex items-center gap-2" style={{ color: greenTextMuted }}>
+              <Battery className="w-3.5 h-3.5" />
+              Step 02 — Battery bank size
+            </div>
+            <div className="ed-mono text-[13px]" style={{ color: greenText, fontWeight: 600 }}>
+              {batteryAh}Ah
+            </div>
+          </div>
+          <input
+            type="range"
+            min={100}
+            max={800}
+            step={50}
+            value={batteryAh}
+            onChange={(e) => setBatteryAh(Number(e.target.value))}
+            className="cryo-slider cryo-slider-dark w-full"
+          />
+          <div className="flex justify-between mt-1.5 ed-mono text-[10px]" style={{ color: greenTextMuted }}>
+            <span>100Ah</span>
+            <span>400Ah</span>
+            <span>800Ah</span>
+          </div>
+        </div>
+
+        {/* Solar slider */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <div className="ed-label flex items-center gap-2" style={{ color: greenTextMuted }}>
+              <Sun className="w-3.5 h-3.5" />
+              Step 03 — Solar input
+            </div>
+            <div className="ed-mono text-[13px]" style={{ color: greenText, fontWeight: 600 }}>
+              {solarW}W
+            </div>
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={1200}
+            step={50}
+            value={solarW}
+            onChange={(e) => setSolarW(Number(e.target.value))}
+            className="cryo-slider cryo-slider-dark w-full"
+          />
+          <div className="flex justify-between mt-1.5 ed-mono text-[10px]" style={{ color: greenTextMuted }}>
+            <span>0W</span>
+            <span>600W</span>
+            <span>1200W</span>
+          </div>
+        </div>
+      </div>
+
+      {/* RIGHT — Results */}
+      <div className="lg:col-span-7">
+        <div
+          className="p-6 lg:p-8 h-full backdrop-blur-sm"
+          style={{
+            background: 'rgba(255,255,255,0.06)',
+            border: `1px solid ${greenRule}`,
+          }}
+        >
+          {!anySelected ? (
+            <div className="flex flex-col items-center justify-center text-center py-20">
+              <AlertCircle className="w-8 h-8 mb-4" style={{ color: greenTextMuted }} strokeWidth={1.5} />
+              <div className="ed-display text-[18px] mb-2" style={{ color: greenText, fontWeight: 600 }}>
+                Select at least one system
+              </div>
+              <div className="text-[13px]" style={{ color: greenTextMuted }}>
+                Toggle the systems on the left to see your power budget.
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="ed-label mb-4 flex items-center gap-2" style={{ color: '#7dd3c0' }}>
+                <Activity className="w-3.5 h-3.5" />
+                Live result
+              </div>
+
+              <div className="grid grid-cols-2 gap-6 mb-8 pb-8" style={{ borderBottom: `1px solid ${greenRule}` }}>
+                <div>
+                  <div className="ed-mono text-[10px] mb-2" style={{ color: greenTextMuted }}>
+                    DAILY DRAW
+                  </div>
+                  <motion.div
+                    key={result.dailyWh}
+                    initial={{ opacity: 0.5 }}
+                    animate={{ opacity: 1 }}
+                    className="ed-display text-[clamp(2rem,4vw,2.75rem)] leading-none"
+                    style={{ color: greenText, fontWeight: 700 }}
+                  >
+                    {result.dailyWh.toLocaleString()}
+                    <span className="text-[18px] ml-1.5" style={{ color: greenTextMuted, fontWeight: 400 }}>Wh</span>
+                  </motion.div>
+                </div>
+                <div>
+                  <div className="ed-mono text-[10px] mb-2" style={{ color: greenTextMuted }}>
+                    SOLAR HARVEST
+                  </div>
+                  <motion.div
+                    key={result.solarWhPerDay}
+                    initial={{ opacity: 0.5 }}
+                    animate={{ opacity: 1 }}
+                    className="ed-display text-[clamp(2rem,4vw,2.75rem)] leading-none"
+                    style={{ color: '#7dd3c0', fontWeight: 700 }}
+                  >
+                    {result.solarWhPerDay.toLocaleString()}
+                    <span className="text-[18px] ml-1.5" style={{ color: greenTextMuted, fontWeight: 400 }}>Wh</span>
+                  </motion.div>
+                </div>
+              </div>
+
+              {/* Visual bars */}
+              <div className="space-y-4 mb-8">
+                <div>
+                  <div className="flex justify-between mb-1.5 text-[11px]" style={{ color: greenTextSoft }}>
+                    <span className="ed-mono">DAILY CONSUMPTION</span>
+                    <span className="ed-mono">{Math.round(drawBarWidth)}% of bank</span>
+                  </div>
+                  <div className="h-2 w-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                    <motion.div
+                      animate={{ width: `${drawBarWidth}%` }}
+                      transition={{ duration: 0.6, ease: 'easeOut' }}
+                      className="h-full"
+                      style={{ background: greenText }}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between mb-1.5 text-[11px]" style={{ color: greenTextSoft }}>
+                    <span className="ed-mono">SOLAR REPLENISHMENT</span>
+                    <span className="ed-mono">{Math.round(solarBarWidth)}% of bank</span>
+                  </div>
+                  <div className="h-2 w-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                    <motion.div
+                      animate={{ width: `${solarBarWidth}%` }}
+                      transition={{ duration: 0.6, ease: 'easeOut' }}
+                      className="h-full"
+                      style={{ background: '#7dd3c0' }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Verdict card */}
+              <div
+                className="p-5 mb-6"
+                style={{
+                  background: surplus ? 'rgba(125,211,192,0.12)' : 'rgba(254,243,199,0.12)',
+                  border: `1px solid ${surplus ? '#7dd3c0' : '#fde68a'}`,
+                }}
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className="w-8 h-8 flex items-center justify-center flex-shrink-0 mt-0.5"
+                    style={{
+                      background: surplus ? '#7dd3c0' : '#fde68a',
+                      color: surplus ? COLORS.greenDeeper : '#78350f',
+                    }}
+                  >
+                    {surplus ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                  </div>
+                  <div className="flex-1">
+                    <div className="ed-display text-[16px] mb-1" style={{ color: greenText, fontWeight: 700 }}>
+                      {surplus
+                        ? 'Indefinite off-grid runtime'
+                        : isFinite(result.daysOffGrid)
+                          ? `~${result.daysOffGrid.toFixed(1)} days off-grid`
+                          : 'Battery-only mode'}
+                    </div>
+                    <div className="text-[13px] leading-[1.6]" style={{ color: greenTextSoft }}>
+                      {surplus
+                        ? `Your ${solarW}W solar harvests more than this build consumes — your bank stays topped up day after day.`
+                        : isFinite(result.daysOffGrid)
+                          ? `Net daily shortfall of ${Math.abs(result.netDailyWh)}Wh. Your ${batteryAh}Ah LiFePO4 bank covers it for about ${result.daysOffGrid.toFixed(1)} days before solar or shore-power top-up is needed.`
+                          : `With no consumption you have unlimited runtime. Select a system above to see the math.`}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Detail row */}
+              <div className="grid grid-cols-3 gap-px" style={{ background: greenRule, border: `1px solid ${greenRule}` }}>
+                <div className="p-4" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                  <div className="ed-mono text-[10px] mb-1.5" style={{ color: greenTextMuted }}>
+                    PEAK DRAW
+                  </div>
+                  <div className="ed-display text-[18px] leading-none" style={{ color: greenText, fontWeight: 700 }}>
+                    {result.peakW}W
+                  </div>
+                </div>
+                <div className="p-4" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                  <div className="ed-mono text-[10px] mb-1.5" style={{ color: greenTextMuted }}>
+                    USABLE Wh
+                  </div>
+                  <div className="ed-display text-[18px] leading-none" style={{ color: greenText, fontWeight: 700 }}>
+                    {result.usableWh.toLocaleString()}
+                  </div>
+                </div>
+                <div className="p-4" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                  <div className="ed-mono text-[10px] mb-1.5" style={{ color: greenTextMuted }}>
+                    NO-SOLAR RUN
+                  </div>
+                  <div className="ed-display text-[18px] leading-none" style={{ color: greenText, fontWeight: 700 }}>
+                    {isFinite(result.runtimeHrsNoSolar) ? `${result.runtimeHrsNoSolar.toFixed(1)}h` : '∞'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Footnote */}
+              <div className="flex items-start gap-2 mt-6 text-[11px] leading-[1.6]" style={{ color: greenTextMuted }}>
+                <Info className="w-3 h-3 mt-0.5 flex-shrink-0" strokeWidth={1.5} />
+                <span>
+                  Estimates assume LiFePO4 chemistry at 80% depth-of-discharge, 4.5 peak-sun-hours, and 75% solar system efficiency. AC values use cycling-average draw, not peak. For a precise sizing review, email{' '}
+                  <a href={LINKS.email} className="underline" style={{ color: greenText }}>
+                    {BUSINESS.email}
+                  </a>.
+                </span>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    MAIN COMPONENT
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -458,14 +861,6 @@ export default function CryonexPage() {
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
   const [activeNav, setActiveNav] = useState('hero');
-  const [activeReport, setActiveReport] = useState(0);
-
-  const heroRef = useRef(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
-  const heroImgY = useTransform(scrollYProgress, [0, 1], ['0%', '20%']);
-  const heroImgScale = useTransform(scrollYProgress, [0, 1], [1.05, 1.15]);
-  const heroTextY = useTransform(scrollYProgress, [0, 1], ['0%', '-25%']);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   const openExt = (url) => window.open(url, '_blank', 'noopener');
   const scrollTo = (id) => {
@@ -473,9 +868,8 @@ export default function CryonexPage() {
     setMenuOpen(false);
   };
 
-  // Sticky-nav active section tracking
   useEffect(() => {
-    const sections = ['hero', 'flagship', 'lineup', 'engineering', 'reports', 'applications', 'specs'];
+    const sections = ['hero', 'flagship', 'lineup', 'engineering', 'calculator', 'applications', 'specs'];
     const obs = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
@@ -489,12 +883,6 @@ export default function CryonexPage() {
       if (el) obs.observe(el);
     });
     return () => obs.disconnect();
-  }, []);
-
-  // Auto-rotate field reports
-  useEffect(() => {
-    const t = setInterval(() => setActiveReport((p) => (p + 1) % FIELD_REPORTS.length), 7000);
-    return () => clearInterval(t);
   }, []);
 
   const handleEmail = (e) => {
@@ -517,12 +905,11 @@ export default function CryonexPage() {
         fontFamily: 'var(--font-body)',
       }}
     >
-      {/* ─── Fonts (Google sans-serif) + base styles ─── */}
+      {/* ─── Fonts + base styles ─── */}
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=JetBrains+Mono:wght@300;400;500&display=swap');
 
         :root {
-          /* Both display & body are Google sans-serif now */
           --font-display: 'DM Sans', 'Inter', system-ui, -apple-system, sans-serif;
           --font-body: 'Inter', 'DM Sans', system-ui, -apple-system, sans-serif;
           --font-mono: 'JetBrains Mono', ui-monospace, monospace;
@@ -573,7 +960,7 @@ export default function CryonexPage() {
           font-weight: 500;
         }
 
-        /* Subtle grain overlay for the page */
+        /* Subtle grain overlay */
         .grain::before {
           content: '';
           position: fixed;
@@ -599,15 +986,6 @@ export default function CryonexPage() {
           animation: gradientShift 8s ease infinite;
         }
 
-        /* Ken-burns slow zoom for hero bg */
-        @keyframes kenburns {
-          0%   { transform: scale(1.05) translate(0, 0); }
-          100% { transform: scale(1.18) translate(-1%, -2%); }
-        }
-        .kenburns {
-          animation: kenburns 22s ease-in-out infinite alternate;
-        }
-
         /* Pulse dot */
         @keyframes pulseDot {
           0%, 100% { transform: scale(1); opacity: 1; }
@@ -615,10 +993,66 @@ export default function CryonexPage() {
         }
         .pulse-dot { animation: pulseDot 2s ease-in-out infinite; }
 
-        /* Marquee */
-        @keyframes marqueeShift {
-          from { transform: translateX(0); }
-          to   { transform: translateX(-50%); }
+        /* Custom range slider — light variant (kept for any future light section) */
+        .cryo-slider {
+          -webkit-appearance: none;
+          appearance: none;
+          height: 4px;
+          background: ${COLORS.rule};
+          outline: none;
+          cursor: pointer;
+        }
+        .cryo-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 20px;
+          height: 20px;
+          background: ${COLORS.ink};
+          border: 2px solid ${COLORS.bg};
+          border-radius: 50%;
+          cursor: grab;
+          box-shadow: 0 2px 6px rgba(12,10,9,0.2);
+          transition: transform 0.15s;
+        }
+        .cryo-slider::-webkit-slider-thumb:hover {
+          transform: scale(1.15);
+          background: ${COLORS.accent};
+        }
+        .cryo-slider::-webkit-slider-thumb:active {
+          cursor: grabbing;
+          transform: scale(1.1);
+        }
+        .cryo-slider::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+          background: ${COLORS.ink};
+          border: 2px solid ${COLORS.bg};
+          border-radius: 50%;
+          cursor: grab;
+          box-shadow: 0 2px 6px rgba(12,10,9,0.2);
+        }
+        .cryo-slider::-moz-range-thumb:hover {
+          background: ${COLORS.accent};
+        }
+
+        /* Dark-variant slider for the dark green calculator section */
+        .cryo-slider-dark {
+          background: rgba(255,255,255,0.12);
+        }
+        .cryo-slider-dark::-webkit-slider-thumb {
+          background: #7dd3c0;
+          border: 2px solid ${COLORS.greenDeep};
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .cryo-slider-dark::-webkit-slider-thumb:hover {
+          background: #a3e5d4;
+        }
+        .cryo-slider-dark::-moz-range-thumb {
+          background: #7dd3c0;
+          border: 2px solid ${COLORS.greenDeep};
+        }
+        .cryo-slider-dark::-moz-range-thumb:hover {
+          background: #a3e5d4;
         }
       `}</style>
 
@@ -666,7 +1100,7 @@ export default function CryonexPage() {
               ['Flagship', 'flagship'],
               ['Lineup', 'lineup'],
               ['Engineering', 'engineering'],
-              ['Field Reports', 'reports'],
+              ['Power Calculator', 'calculator'],
               ['Specs', 'specs'],
             ].map(([label, id]) => (
               <button
@@ -727,7 +1161,7 @@ export default function CryonexPage() {
                   ['Flagship', 'flagship'],
                   ['Lineup', 'lineup'],
                   ['Engineering', 'engineering'],
-                  ['Field Reports', 'reports'],
+                  ['Power Calculator', 'calculator'],
                   ['Specs', 'specs'],
                 ].map(([label, id]) => (
                   <button
@@ -754,72 +1188,36 @@ export default function CryonexPage() {
       </nav>
 
       {/* ════════════════════════════════════════════════════════════════════
-          HERO — full-bleed bg image + content overlay + parallax
+          HERO
           ════════════════════════════════════════════════════════════════════ */}
       <section
         id="hero"
-        ref={heroRef}
         className="relative min-h-screen w-full overflow-hidden flex items-center"
       >
-        {/* Full-bleed background image - static */}
-<div className="absolute inset-0 z-0">
-  <img
-    src={HERO_IMAGE}
-    alt=""
-    className="absolute inset-0 w-full h-full object-cover"
-  />
-</div>
+        <div className="absolute inset-0 z-0">
+          <img
+            src={HERO_IMAGE}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        </div>
 
-        {/* Gradient overlay for legibility */}
         <div
           className="absolute inset-0 z-10 pointer-events-none"
           style={{
-            background: `linear-gradient(110deg, rgba(250,250,249,0.96) 0%, rgba(250,250,249,0.88) 35%, rgba(250,250,249,0.55) 60%, rgba(12,10,9,0.35) 100%)`,
+            background: `linear-gradient(110deg, rgba(250,250,249,0.97) 0%, rgba(250,250,249,0.92) 38%, rgba(250,250,249,0.65) 62%, rgba(12,10,9,0.32) 100%)`,
           }}
         />
 
-        {/* Dot pattern overlay */}
         <div
-          className="absolute inset-0 z-10 pointer-events-none opacity-[0.05]"
+          className="absolute inset-0 z-10 pointer-events-none opacity-[0.04]"
           style={{
             backgroundImage: `radial-gradient(${COLORS.ink} 1px, transparent 1px)`,
             backgroundSize: '24px 24px',
           }}
         />
 
-        {/* Floating decorative shapes (subtle motion) */}
-        <motion.div
-          className="absolute top-32 right-[8%] z-10 hidden lg:block pointer-events-none"
-          animate={{ y: [0, -20, 0], rotate: [0, 8, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <div
-            className="w-24 h-24 rounded-full"
-            style={{
-              background: `radial-gradient(circle at 30% 30%, ${COLORS.accent}25, transparent 70%)`,
-              filter: 'blur(10px)',
-            }}
-          />
-        </motion.div>
-        <motion.div
-          className="absolute bottom-32 left-[10%] z-10 hidden lg:block pointer-events-none"
-          animate={{ y: [0, 18, 0], rotate: [0, -6, 0] }}
-          transition={{ duration: 13, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <div
-            className="w-32 h-32 rounded-full"
-            style={{
-              background: `radial-gradient(circle at 30% 30%, ${COLORS.copper}20, transparent 70%)`,
-              filter: 'blur(14px)',
-            }}
-          />
-        </motion.div>
-
-        {/* Hero content */}
-        <motion.div
-          style={{ y: heroTextY, opacity: heroOpacity }}
-          className="relative z-20 max-w-[1400px] mx-auto px-6 lg:px-10 pt-32 pb-20 w-full"
-        >
+        <div className="relative z-20 max-w-[1400px] mx-auto px-6 lg:px-10 pt-32 pb-20 w-full">
           <motion.div
             initial="hidden"
             animate="visible"
@@ -843,10 +1241,10 @@ export default function CryonexPage() {
 
               <motion.h1
                 variants={fadeUp}
-                className="ed-display text-[clamp(2.75rem,8vw,7rem)] leading-[0.92] mb-8"
+                className="ed-display text-[clamp(2.75rem,8vw,7rem)] leading-[1.05] mb-8 pr-4"
               >
                 <span style={{ color: COLORS.ink }}>Climate </span>
-                <span className="grad-text italic" style={{ fontWeight: 700 }}>without</span>
+                <span className="grad-text italic inline-block pr-1" style={{ fontWeight: 700 }}>without</span>
                 <span style={{ color: COLORS.ink }}> the</span>
                 <br />
                 <span style={{ color: COLORS.ink }}>inverter.</span>
@@ -874,16 +1272,15 @@ export default function CryonexPage() {
                   </button>
                 </Magnetic>
                 <button
-                  onClick={() => scrollTo('lineup')}
+                  onClick={() => scrollTo('calculator')}
                   className="inline-flex items-center gap-2 text-[13px] underline-offset-4 hover:underline transition group"
                   style={{ color: COLORS.ink, fontWeight: 600 }}
                 >
-                  Explore the full lineup
+                  Try the power calculator
                   <ChevronDown className="w-3.5 h-3.5 transition-transform group-hover:translate-y-0.5" />
                 </button>
               </motion.div>
 
-              {/* Hero metrics with animated counters */}
               <motion.div variants={fadeUp} className="grid grid-cols-3 gap-6 max-w-[520px]">
                 {[
                   { num: 8200, suffix: '', label: 'BTU output' },
@@ -905,18 +1302,14 @@ export default function CryonexPage() {
               </motion.div>
             </div>
 
-            {/* Right side — floating product card */}
             <motion.div
               variants={fadeUp}
               className="hidden lg:block lg:col-span-4"
             >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.9, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              <div
                 className="relative p-6 backdrop-blur-md"
                 style={{
-                  background: 'rgba(255,255,255,0.7)',
+                  background: 'rgba(255,255,255,0.78)',
                   border: `1px solid ${COLORS.rule}`,
                   boxShadow: '0 20px 60px rgba(12,10,9,0.08)',
                 }}
@@ -935,12 +1328,10 @@ export default function CryonexPage() {
                   className="aspect-[4/3] w-full overflow-hidden mb-5"
                   style={{ border: `1px solid ${COLORS.rule}` }}
                 >
-                  <motion.img
-                    src={HERO_IMAGE}
+                  <img
+                    src={FLAGSHIP.images[0]}
                     alt="X700"
                     className="w-full h-full object-cover"
-                    whileHover={{ scale: 1.08 }}
-                    transition={{ duration: 0.6 }}
                   />
                 </div>
                 <div className="flex items-end justify-between mb-4">
@@ -959,11 +1350,10 @@ export default function CryonexPage() {
                 >
                   View flagship
                 </button>
-              </motion.div>
+              </div>
             </motion.div>
           </motion.div>
 
-          {/* Scroll indicator */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -978,7 +1368,7 @@ export default function CryonexPage() {
               <ArrowDown className="w-3.5 h-3.5" style={{ color: COLORS.inkMuted }} />
             </motion.div>
           </motion.div>
-        </motion.div>
+        </div>
       </section>
 
       {/* ════════════════════════════════════════════════════════════════════
@@ -1098,10 +1488,8 @@ export default function CryonexPage() {
                 style={{ background: COLORS.rule, border: `1px solid ${COLORS.rule}` }}
               >
                 {FLAGSHIP.metrics.map((m) => (
-                  <motion.div
+                  <div
                     key={m.k}
-                    whileHover={{ y: -2 }}
-                    transition={{ duration: 0.2 }}
                     className="p-5"
                     style={{ background: COLORS.bgPaper }}
                   >
@@ -1117,7 +1505,7 @@ export default function CryonexPage() {
                     >
                       {m.v}
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </motion.div>
 
@@ -1212,20 +1600,17 @@ export default function CryonexPage() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════════
-          LIVE METRICS STRIP (Animated counters in dark band)
+          LIVE METRICS STRIP (dark band)
           ════════════════════════════════════════════════════════════════════ */}
       <section
         className="py-14 px-6 lg:px-10 relative overflow-hidden"
         style={{ background: COLORS.ink, color: COLORS.bg }}
       >
-        {/* Subtle moving gradient */}
-        <motion.div
-          className="absolute inset-0 opacity-20 pointer-events-none"
+        <div
+          className="absolute inset-0 opacity-15 pointer-events-none"
           style={{
             background: `radial-gradient(circle at 30% 50%, ${COLORS.accent}, transparent 50%)`,
           }}
-          animate={{ x: ['-10%', '10%', '-10%'] }}
-          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
         />
         <div className="max-w-[1400px] mx-auto relative grid grid-cols-2 lg:grid-cols-4 gap-10">
           {LIVE_METRICS.map((m, idx) => (
@@ -1460,10 +1845,31 @@ export default function CryonexPage() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════════
-          ENGINEERING PILLARS
+          ENGINEERING PILLARS — RE-THEMED:  pale sage / mint background
+          Subtle green wash, dark text retained, green hairline rules
           ════════════════════════════════════════════════════════════════════ */}
-      <section id="engineering" className="py-24 lg:py-32 px-6 lg:px-10">
-        <div className="max-w-[1400px] mx-auto">
+      <section
+        id="engineering"
+        className="py-24 lg:py-32 px-6 lg:px-10 relative overflow-hidden"
+        style={{ background: COLORS.greenLight }}
+      >
+        {/* Very faint diagonal stripe pattern in deeper green for texture */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.04]"
+          style={{
+            backgroundImage: `repeating-linear-gradient(135deg, ${COLORS.greenDeep} 0px, ${COLORS.greenDeep} 1px, transparent 1px, transparent 22px)`,
+          }}
+        />
+        {/* Soft radial glow upper right */}
+        <div
+          className="absolute -top-40 -right-40 w-[600px] h-[600px] pointer-events-none opacity-30"
+          style={{
+            background: `radial-gradient(circle, ${COLORS.accent}25, transparent 65%)`,
+            filter: 'blur(40px)',
+          }}
+        />
+
+        <div className="max-w-[1400px] mx-auto relative">
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -1474,14 +1880,14 @@ export default function CryonexPage() {
             <motion.div variants={fadeUp} className="lg:col-span-5">
               <div className="flex items-baseline gap-5 mb-6">
                 <span className="ed-label" style={{ color: COLORS.accent }}>04 — Engineering</span>
-                <span className="h-px flex-1" style={{ background: COLORS.rule }} />
+                <span className="h-px flex-1" style={{ background: COLORS.greenMid }} />
               </div>
               <h2
                 className="ed-display text-[clamp(2rem,4vw,3.25rem)] leading-[1.05]"
                 style={{ color: COLORS.ink, fontWeight: 700 }}
               >
                 Four principles{' '}
-                <em style={{ fontStyle: 'italic', color: COLORS.inkSoft, fontWeight: 400 }}>
+                <em style={{ fontStyle: 'italic', color: COLORS.accent, fontWeight: 500 }}>
                   every system follows.
                 </em>
               </h2>
@@ -1499,7 +1905,7 @@ export default function CryonexPage() {
 
           <div
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px"
-            style={{ background: COLORS.rule, border: `1px solid ${COLORS.rule}` }}
+            style={{ background: COLORS.greenMid, border: `1px solid ${COLORS.greenMid}` }}
           >
             {PILLARS.map((p, idx) => (
               <motion.div
@@ -1509,21 +1915,20 @@ export default function CryonexPage() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: idx * 0.08, ease: [0.22, 1, 0.36, 1] }}
                 whileHover={{ y: -4 }}
-                className="p-8 lg:p-10 group transition-all hover:bg-stone-50 relative overflow-hidden cursor-default"
-                style={{ background: COLORS.bgPaper }}
+                className="p-8 lg:p-10 group transition-all relative overflow-hidden cursor-default"
+                style={{ background: 'rgba(255,255,255,0.85)' }}
               >
-                {/* Animated background accent on hover */}
                 <motion.div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                   style={{
-                    background: `radial-gradient(circle at 80% 20%, ${COLORS.accent}08, transparent 70%)`,
+                    background: `radial-gradient(circle at 80% 20%, ${COLORS.accent}15, transparent 70%)`,
                   }}
                 />
                 <div className="relative">
                   <div className="flex items-start justify-between mb-8">
                     <span
                       className="ed-mono text-[11px]"
-                      style={{ color: COLORS.inkMuted }}
+                      style={{ color: COLORS.accent }}
                     >
                       {p.n}
                     </span>
@@ -1555,33 +1960,57 @@ export default function CryonexPage() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════════
-          NEW SECTION — FIELD REPORTS (Testimonials carousel with bg image)
+          POWER BUDGET CALCULATOR — RE-THEMED:  DEEP GREEN with bg image overlay
           ════════════════════════════════════════════════════════════════════ */}
       <section
-        id="reports"
-        className="relative py-24 lg:py-32 px-6 lg:px-10 overflow-hidden"
-        style={{ background: COLORS.ink, color: COLORS.bg }}
+        id="calculator"
+        className="py-24 lg:py-32 px-6 lg:px-10 relative overflow-hidden"
+        style={{ background: COLORS.greenDeep }}
       >
-        {/* Background image with overlay */}
-        {/* Background image with overlay - static */}
-<div className="absolute inset-0 z-0 opacity-25">
-  <img src={HERO_IMAGE} alt="" className="w-full h-full object-cover" />
-</div>
+        {/* Background image, low opacity */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src={SECTION_BG_IMAGE}
+            alt=""
+            className="w-full h-full object-cover"
+            style={{ opacity: 0.18 }}
+          />
+        </div>
+
+        {/* Deep green overlay — keeps readability high */}
         <div
-          className="absolute inset-0 z-0"
+          className="absolute inset-0 z-10 pointer-events-none"
           style={{
-            background: `linear-gradient(135deg, rgba(12,10,9,0.95) 0%, rgba(12,10,9,0.7) 60%, rgba(13,90,79,0.5) 100%)`,
-          }}
-        />
-        <div
-          className="absolute inset-0 z-0 opacity-[0.05] pointer-events-none"
-          style={{
-            backgroundImage: `radial-gradient(rgba(255,255,255,0.4) 1px, transparent 1px)`,
-            backgroundSize: '24px 24px',
+            background: `linear-gradient(135deg, ${COLORS.greenDeeper}f2 0%, ${COLORS.greenDeep}ee 50%, ${COLORS.greenDeeper}f2 100%)`,
           }}
         />
 
-        <div className="max-w-[1400px] mx-auto relative z-10">
+        {/* Subtle dotted pattern for depth */}
+        <div
+          className="absolute inset-0 z-10 pointer-events-none opacity-[0.05]"
+          style={{
+            backgroundImage: `radial-gradient(rgba(255,255,255,0.6) 1px, transparent 1px)`,
+            backgroundSize: '28px 28px',
+          }}
+        />
+
+        {/* Ambient radial accents */}
+        <div
+          className="absolute top-0 left-1/4 w-[500px] h-[500px] pointer-events-none z-10"
+          style={{
+            background: `radial-gradient(circle, rgba(125,211,192,0.18), transparent 60%)`,
+            filter: 'blur(60px)',
+          }}
+        />
+        <div
+          className="absolute bottom-0 right-1/4 w-[500px] h-[500px] pointer-events-none z-10"
+          style={{
+            background: `radial-gradient(circle, rgba(125,211,192,0.12), transparent 60%)`,
+            filter: 'blur(60px)',
+          }}
+        />
+
+        <div className="max-w-[1400px] mx-auto relative z-20">
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -1590,131 +2019,83 @@ export default function CryonexPage() {
             className="mb-16"
           >
             <motion.div variants={fadeUp} className="flex items-baseline gap-5 mb-6">
-              <span className="ed-label" style={{ color: COLORS.accentSoft }}>05 — Field Reports</span>
-              <span className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.15)' }} />
+              <span className="ed-label flex items-center gap-2" style={{ color: '#7dd3c0' }}>
+                <Calculator className="w-3.5 h-3.5" />
+                05 — Power Budget Calculator
+              </span>
+              <span className="h-px flex-1" style={{ background: 'rgba(255,255,255,0.18)' }} />
+              <span className="ed-mono text-[11px] hidden md:inline" style={{ color: COLORS.greenMuted }}>
+                LIVE · INTERACTIVE
+              </span>
             </motion.div>
             <motion.h2
               variants={fadeUp}
-              className="ed-display text-[clamp(2rem,4.5vw,3.75rem)] leading-[1.05] max-w-4xl"
-              style={{ fontWeight: 700 }}
+              className="ed-display text-[clamp(2rem,4.5vw,3.75rem)] leading-[1.05] max-w-4xl mb-5"
+              style={{ color: COLORS.greenInk, fontWeight: 700 }}
             >
-              From builders <em style={{ fontStyle: 'italic', color: COLORS.accentSoft, fontWeight: 400 }}>who lived in it</em>.
+              Will it run on your bank?{' '}
+              <em style={{ fontStyle: 'italic', color: '#7dd3c0', fontWeight: 400 }}>
+                Find out in 10 seconds.
+              </em>
             </motion.h2>
+            <motion.p
+              variants={fadeUp}
+              className="text-[15px] max-w-[680px] leading-[1.7]"
+              style={{ color: 'rgba(232,241,237,0.82)' }}
+            >
+              Pick the Cryonex systems you're planning, set your battery and solar specs, and see
+              live estimates for daily consumption, solar replenishment, and days of autonomous
+              off-grid runtime — calculated from real product wattages.
+            </motion.p>
           </motion.div>
 
-          {/* Big quote panel */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
-            <div className="lg:col-span-8">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeReport}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                >
-                  <Quote
-                    className="w-12 h-12 mb-8 opacity-30"
-                    style={{ color: COLORS.accentSoft }}
-                    strokeWidth={1}
-                  />
-                  <blockquote
-                    className="ed-display text-[clamp(1.5rem,2.8vw,2.25rem)] leading-[1.35] mb-10"
-                    style={{ fontWeight: 500 }}
-                  >
-                    "{FIELD_REPORTS[activeReport].quote}"
-                  </blockquote>
-
-                  <div className="flex flex-wrap items-center gap-6 pb-6" style={{ borderBottom: `1px solid rgba(255,255,255,0.15)` }}>
-                    <div>
-                      <div className="ed-display text-[18px] mb-1" style={{ fontWeight: 700 }}>
-                        {FIELD_REPORTS[activeReport].author}
-                      </div>
-                      <div className="ed-mono text-[11px]" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                        {FIELD_REPORTS[activeReport].rig.toUpperCase()}
-                      </div>
-                    </div>
-                    <span className="h-8 w-px" style={{ background: 'rgba(255,255,255,0.2)' }} />
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5" style={{ color: COLORS.accentSoft }} strokeWidth={1.5} />
-                      <span className="text-[13px]" style={{ color: 'rgba(255,255,255,0.75)' }}>
-                        {FIELD_REPORTS[activeReport].location}
-                      </span>
-                    </div>
-                    <span className="h-8 w-px" style={{ background: 'rgba(255,255,255,0.2)' }} />
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: FIELD_REPORTS[activeReport].rating }).map((_, i) => (
-                        <Star key={i} className="w-3.5 h-3.5 fill-current" style={{ color: COLORS.accentSoft }} />
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-
-            {/* Selector column */}
-            <div className="lg:col-span-4 flex flex-col gap-3">
-              {FIELD_REPORTS.map((r, idx) => (
-                <motion.button
-                  key={idx}
-                  onClick={() => setActiveReport(idx)}
-                  whileHover={{ x: 4 }}
-                  className="text-left p-5 transition-all relative overflow-hidden"
-                  style={{
-                    background: activeReport === idx ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.02)',
-                    border: `1px solid ${activeReport === idx ? COLORS.accentSoft : 'rgba(255,255,255,0.1)'}`,
-                  }}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="ed-mono text-[10px]" style={{ color: COLORS.accentSoft }}>
-                      REPORT {String(idx + 1).padStart(2, '0')}
-                    </span>
-                    {activeReport === idx && (
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: 24 }}
-                        className="h-px"
-                        style={{ background: COLORS.accentSoft }}
-                      />
-                    )}
-                  </div>
-                  <div className="ed-display text-[15px]" style={{ fontWeight: 600 }}>
-                    {r.author}
-                  </div>
-                  <div className="ed-mono text-[10px] mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                    {r.location.toUpperCase()}
-                  </div>
-                </motion.button>
-              ))}
-            </div>
-          </div>
-
-          {/* Progress dots */}
-          <div className="flex items-center gap-2 mt-12">
-            {FIELD_REPORTS.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setActiveReport(idx)}
-                className="h-px transition-all"
-                style={{
-                  width: activeReport === idx ? 40 : 16,
-                  background: activeReport === idx ? COLORS.accentSoft : 'rgba(255,255,255,0.25)',
-                }}
-              />
-            ))}
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-50px' }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <PowerCalculator />
+          </motion.div>
         </div>
       </section>
 
       {/* ════════════════════════════════════════════════════════════════════
-          APPLICATIONS
+          APPLICATIONS — RE-THEMED:  green-tinted with subtle bg image
           ════════════════════════════════════════════════════════════════════ */}
       <section
         id="applications"
-        className="py-24 lg:py-32 px-6 lg:px-10"
-        style={{ background: COLORS.bgPaper }}
+        className="py-24 lg:py-32 px-6 lg:px-10 relative overflow-hidden"
+        style={{ background: COLORS.greenLight }}
       >
-        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+        {/* Optional faint background image */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src={SECTION_BG_IMAGE}
+            alt=""
+            className="w-full h-full object-cover"
+            style={{ opacity: 0.08 }}
+          />
+        </div>
+
+        {/* Sage wash overlay for legibility */}
+        <div
+          className="absolute inset-0 z-10 pointer-events-none"
+          style={{
+            background: `linear-gradient(120deg, ${COLORS.greenLight}f7 0%, ${COLORS.greenLight}f0 60%, ${COLORS.greenLight}f7 100%)`,
+          }}
+        />
+
+        {/* Soft accent glow */}
+        <div
+          className="absolute top-1/4 -left-32 w-[500px] h-[500px] pointer-events-none z-10 opacity-40"
+          style={{
+            background: `radial-gradient(circle, ${COLORS.accent}20, transparent 60%)`,
+            filter: 'blur(50px)',
+          }}
+        />
+
+        <div className="max-w-[1400px] mx-auto relative z-20 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -1724,7 +2105,7 @@ export default function CryonexPage() {
           >
             <motion.div variants={fadeUp} className="flex items-baseline gap-5 mb-6">
               <span className="ed-label" style={{ color: COLORS.accent }}>06 — Applications</span>
-              <span className="h-px flex-1" style={{ background: COLORS.rule }} />
+              <span className="h-px flex-1" style={{ background: COLORS.greenMid }} />
             </motion.div>
             <motion.h2
               variants={fadeUp}
@@ -1754,7 +2135,7 @@ export default function CryonexPage() {
               <a
                 href={LINKS.email}
                 className="underline hover:no-underline"
-                style={{ color: COLORS.ink }}
+                style={{ color: COLORS.accent, fontWeight: 600 }}
               >
                 {BUSINESS.email}
               </a>{' '}
@@ -1779,14 +2160,15 @@ export default function CryonexPage() {
                   transition={{ duration: 0.25 }}
                   className="p-6 transition-all group cursor-default relative overflow-hidden"
                   style={{
-                    background: COLORS.bg,
-                    border: `1px solid ${COLORS.rule}`,
+                    background: 'rgba(255,255,255,0.85)',
+                    border: `1px solid ${COLORS.greenMid}`,
+                    backdropFilter: 'blur(4px)',
                   }}
                 >
                   <motion.div
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
                     style={{
-                      background: `radial-gradient(circle at 80% 20%, ${COLORS.accent}10, transparent 70%)`,
+                      background: `radial-gradient(circle at 80% 20%, ${COLORS.accent}18, transparent 70%)`,
                     }}
                   />
                   <div className="relative">
@@ -1980,14 +2362,11 @@ export default function CryonexPage() {
           CLOSING CTA
           ════════════════════════════════════════════════════════════════════ */}
       <section className="py-28 lg:py-36 px-6 lg:px-10 text-center relative overflow-hidden" style={{ background: COLORS.bgPaper }}>
-        {/* Subtle radial accent */}
-        <motion.div
+        <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background: `radial-gradient(circle at 50% 50%, ${COLORS.accent}08, transparent 60%)`,
           }}
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
           initial="hidden"
@@ -2121,7 +2500,6 @@ export default function CryonexPage() {
                   ['X700 Rooftop AC', productUrl(FLAGSHIP.handle)],
                   ['BC83A Compressor Fridge', productUrl(PRODUCTS[0].handle)],
                   ['Roof Ventilation Fan', productUrl(PRODUCTS[1].handle)],
-                  /* Updated: "All Ventilation products" now points to /pages/ventilation */
                   ['All Ventilation products', LINKS.shopAll],
                 ].map(([label, href]) => (
                   <li key={label}>
